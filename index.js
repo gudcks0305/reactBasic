@@ -7,7 +7,7 @@ const config = require('./config/key')
 app.use(bodyParser.urlencoded({extended:true}))
 
 app.use(bodyParser.json());
-mongoose.connect(config.mongoURL.replace(),{  
+mongoose.connect(config.mongoURL,{  
     useNewUrlParser : true, useUnifiedTopology: true, useCreateIndex : true, useFindAndModify:false
 }).then(() => console.log('connect is good'))
    .catch(err => console.log(err))
