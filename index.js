@@ -5,18 +5,23 @@ const {user, User} = require('./models/User')
 const bodyParser = require('body-parser')
 const config = require('./config/key')
 const cookieParser = require('cookie-parser')
+const {auth} = require('./middleware/auth')
 app.use(bodyParser.urlencoded({extended:true}))
-
+app.use(cookieParser());
 app.use(bodyParser.json());
 mongoose.connect(config.mongoURL,{  
     useNewUrlParser : true, useUnifiedTopology: true, useCreateIndex : true, useFindAndModify:false
 }).then(() => console.log('connect is good'))
    .catch(err => console.log(err))
 
+
+
 app.get('/', function (req, res) {
   res.send('Hello World!rr')
 })
-app.post('/register',(req,res)=> {
+
+
+app.post('/api/users/register',(req,res)=> {
   // 회원가입 필요정보
   const user = new User(req.body)
   user.save((err,userInfo)=>{
@@ -26,7 +31,9 @@ app.post('/register',(req,res)=> {
     })
   })
 })
-app.post('/login',(req,res)=>{
+
+
+app.post('/api/users/login',(req,res)=>{
   // 요청된 이메일을 데이터베이스에서 있는지 찾는다.
   User.findOne({email : req.body.email}, (err,user)=>{
     if(!user){ 
@@ -50,10 +57,42 @@ app.post('/login',(req,res)=>{
     if(err) return res.status(400).send(err)
     //토큰을 어디에 저장?? 로컬 , 쿠키 ??
     res.cookie('x_auth',user.token).status(200).json({loginSuccess:true,userId:user._id})
+    
   })
   })
-  
+
 })
+
+
+
+
+app.get('/api/users/auth', auth ,(req,res)=>{
+ //미들웨어 통과를 햇다는건 어센틱케이션 트루
+ res.status(200).json({
+   _id : req.user._id,
+   isAdmin : req.user.role === 0 ? false : true,
+   isAuth : true,
+   email: req.user.email,
+   name : req.user.name,
+   lastname : req.user.lastname,
+   role : req.user.role,
+   image:req.user.image
+ })
+})
+
+
+
+app.get('/api/users/logout', auth , (req,res) =>{
+  User.findOneAndUpdate({ _id : req.user._id} , 
+    {token : ""},
+    function(err,user){
+      if(err) return res.json({success : false , err})
+      return res.status(200).send({
+        success : true
+      })
+    })
+})
+
   
  
 app.listen(3000,console.log('is good'))
