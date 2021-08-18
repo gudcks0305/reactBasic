@@ -5,7 +5,7 @@ const {user, User} = require('./models/User')
 const bodyParser = require('body-parser')
 const config = require('./config/key')
 const cookieParser = require('cookie-parser')
-const {auth} = require('./middleware/auth')
+const {auth} = require('../middleware/auth')
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -80,6 +80,9 @@ app.get('/api/users/auth', auth ,(req,res)=>{
  })
 })
 
+app.get('/api/hello',(req,res)=>{
+  res.send('안녕하세요')
+})
 
 
 app.get('/api/users/logout', auth , (req,res) =>{
@@ -95,4 +98,4 @@ app.get('/api/users/logout', auth , (req,res) =>{
 
   
  
-app.listen(3000,console.log('is good'))
+app.listen(5000,console.log('is good'))
